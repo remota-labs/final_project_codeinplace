@@ -1,0 +1,185 @@
+"""
+BlackJack: WIP
+todo: fleshout design + description + ask Mehran the Great to mentor me :D
+"""
+
+import random
+
+def main():
+    player_stack = 20
+    while player_stack >0:
+        print(player_stack)
+        result = play_hand()
+        if result == "user":
+            print("winner is User")
+            player_stack += 1
+        elif result == "tie":
+            print("Game is a Tie")
+        elif result == "dealer":
+            print("Winner is Dealer")
+            player_stack -= 10
+    print("You've lost")
+
+
+
+
+def play_hand():
+    deck = deck_of_cards() #deck of cards(disabled for testing)
+    user_hand = [] #user hand
+    dealer_hand = [] #dealer hand
+    shuf_deck = shuffle(deck) #shuffles the deck and labels it shuf_deck
+    deal_start(shuf_deck,user_hand,dealer_hand)
+    print("")
+    print("Dealer shows two cards, one face up. It shows:   " +  str(dealer_hand[1][0]))
+    print("")
+    user_hvalue = process_user_hvalue(user_hand) #processes user hand value, returns and stores as user_hvalue
+    print("Peak at Dealer's cards for debug:   " + str(dealer_hand[0][0]) + " & " + str(dealer_hand[1][0]))
+    print("")
+    dealer_hvalue = process_dealer_hvalue(dealer_hand) #processes dealer hand value, returns and stores as dealer_hvalue
+    user_turn = process_user_turn(shuf_deck,user_hand,user_hvalue)
+    user_hvalue = process_user_hvalue(user_hand)
+    print("Your hand is:  ")
+    for elem in user_hand:
+        print(elem[0])
+    print("Your hand value is:  ")
+    print(user_hvalue)
+    dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue)
+    dealer_hvalue = process_dealer_hvalue(dealer_hand)
+    print("Dealer hand is:  ")
+    for elem in dealer_hand:
+        print(elem[0])
+    print("Dealer hand value is:  ")
+    print(dealer_hvalue)
+    if user_hvalue > dealer_hvalue and user_hvalue <= 21: #user wins
+        result = "user"
+        return result
+    elif user_hvalue == dealer_hvalue or user_hvalue > 21 and dealer_hvalue > 21: #tie
+        result = "tie"
+        return result
+    else:                                                            #dealer win
+        result = "dealer"
+        return result
+
+
+
+
+def process_dealer_turn(deck,hand,hvalue):
+    a_counter = 0
+    for elem in hand:
+        if "Ace" in elem:
+            a_counter+= 1
+    while hvalue < 17 and a_counter > 0:
+        top_card = deck.pop(0)
+        hand.append(top_card)
+        hvalue = process_dealer_hvalue(hand)
+    return deck,hand,hvalue
+
+def process_user_turn(deck,hand,hvalue):
+    while hvalue <= 21:
+        user_choice = input("Your hand shows:   " + str(hand) + " Hand value: " +str(hvalue)+ "...Would you like another card? \n Y/N?\n")
+        if user_choice == "y" or user_choice == "Y":
+            top_card = deck.pop(0)
+            hand.append(top_card)
+            hvalue = process_user_hvalue(hand)
+        elif user_choice == "n" or user_choice == "N":
+            user_choice = input("You choose to stand pat. Are you sure? \n Y/N?")
+            if user_choice == "y" or user_choice == "Y":
+                return deck,hand,hvalue
+        elif user_choice != "y" or user_choice != "Y" or user_choice != "n" or user_choice != "N":
+            print("You must choose a valid entry.")
+            pass
+    print("You have bust.")
+    return deck,hand,hvalue
+
+def process_dealer_hvalue(hand):
+    a_counter = 0 #ace counter initialize
+    value = 0
+    for elem in hand:
+        value += elem[1]
+        if "Ace" in elem[0]:
+            a_counter += 1
+    while value > 21 and a_counter > 0:
+        value -= 10 
+        a_counter -= 1
+    return value
+
+
+def process_user_hvalue(hand):
+    a_counter = 0 #ace counter initialize
+    value = 0
+    for elem in hand:
+        value += elem[1]
+        if "Ace" in elem[0]:
+            a_counter += 1
+    while value > 21 and a_counter > 0:
+        value -= 10 
+        a_counter -= 1
+    return value
+
+def deal_start(deck,user,dealer):
+    """
+    deal_start function takes the deck(list), along with the user and dealer hands, 
+    and dealers 4 cards in this order from the top of the shuffled deck: 
+    user, dealer, user dealer.
+    It then returns the remaining deck, and newly built user & dealer hands.
+    """
+    top_card = deck.pop(0)
+    user.append(top_card)
+    top_card = deck.pop(0)
+    dealer.append(top_card)
+    top_card = deck.pop(0)
+    user.append(top_card)
+    top_card = deck.pop(0)
+    dealer.append(top_card)
+
+    return deck,user,dealer
+    
+    
+
+def shuffle(deck):
+    """
+    Fisher-Yates Shuffle function - Chris Peacock's take.
+    Takes a deck of cards, shuffles them, returns the shuffled deck.
+    As recommended by my friend Steven when I told him about my blackjack project and 
+    how easy it is to use shuffle.list with the random library. 
+    Thanks for the challenge Steven!
+    """
+    shuf_deck = []
+    
+    for i in range(0,len(deck)):
+        deck_length = len(deck)
+        ran_index = random.randrange(0,deck_length)
+        popped_index = deck.pop(ran_index)
+        shuf_deck.append(popped_index)
+    
+    return shuf_deck
+        
+        
+
+
+
+def deck_of_cards():
+    """
+    A list of 52 individual lists. Those 52 list elements pertain 
+    to each of the unique 52 cards in a traditional deck of cards.
+    Format: [Card face , Card value]
+    """
+    deck = [
+    ["Ace of Spades",11],["Ace of Hearts",11],["Ace of Clubs",11],["Ace of Diamonds",11],
+    ["King of Spades",10],["King of Hearts",10],["King of Clubs",10],["King of Diamonds",10],
+    ["Queen of Spades",10],["Queen of Hearts",10],["Queen of Clubs",10],["Queen of Diamonds",10],
+    ["Jack of Spades",10],["Jack of Hearts",10],["Jack of Clubs",10],["Jack of Diamonds",10],
+    ["10 of Spades",10],["10 of Hearts",10],["10 of Clubs",10],["10 of Diamonds",10],
+    ["9 of Spades",9],["9 of Hearts",9],["9 of Clubs",9],["9 of Diamonds",9],
+    ["8 of Spades",8],["8 of Hearts",8],["8 of Clubs",8],["8 of Diamonds",8],
+    ["7 of Spades",7],["7 of Hearts",7],["7 of Clubs",7],["7 of Diamonds",7],
+    ["6 of Spades",6],["6 of Hearts",6],["6 of Clubs",6],["6 of Diamonds",6],
+    ["5 of Spades",5],["5 of Hearts",5],["5 of Clubs",5],["5 of Diamonds",5],
+    ["4 of Spades",4],["4 of Hearts",4],["4 of Clubs",4],["4 of Diamonds",4],
+    ["3 of Spades",3],["3 of Hearts",3],["3 of Clubs",3],["3 of Diamonds",3],
+    ["2 of Spades",2],["2 of Hearts",2],["2 of Clubs",2],["2 of Diamonds",2],
+    ]
+    return deck
+
+if __name__ == '__main__':
+    main()
