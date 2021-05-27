@@ -17,8 +17,8 @@ but this Dealer does.(As an added challenge to myself)
 
 import random
 
-BET = 2 #Adjustable bet amountamount
-USER_STACK = 20
+BET = 2 #bet sizing
+USER_STACK = 20 #stack size
 
 def main():
     stack = USER_STACK
