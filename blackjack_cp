@@ -6,69 +6,74 @@ todo: fleshout design + description + ask Mehran the Great to mentor me :D
 import random
 
 def main():
-    player_stack = 20
-    while player_stack >0:
-        print(player_stack)
+    BET = 2
+    PLAYER_STACK = 20
+    print("You have " + str(PLAYER_STACK) + " chips. Amount waged per hand: " + str(BET) + " chips.")
+    while PLAYER_STACK > 0:
         result = play_hand()
         if result == "user":
-            print("winner is User")
-            player_stack += 1
+            PLAYER_STACK += BET
+            print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(PLAYER_STACK)+ " total.")
+            enter = input("Press Enter to continue. ")
+            if enter == "":
+                continue
         elif result == "tie":
-            print("Game is a Tie")
+            print("Game is a tie, hand is pushed")
         elif result == "dealer":
-            print("Winner is Dealer")
-            player_stack -= 10
+            PLAYER_STACK -= BET
+            print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(PLAYER_STACK)+ " total.")
+            enter = input("Press Enter to continue. ")
+            if enter == "":
+                continue
     print("You've lost")
 
-
-
-
 def play_hand():
-    deck = deck_of_cards() #deck of cards(disabled for testing)
+
+    deck = deck_of_cards() #deck of cards
     user_hand = [] #user hand
     dealer_hand = [] #dealer hand
-    shuf_deck = shuffle(deck) #shuffles the deck and labels it shuf_deck
-    deal_start(shuf_deck,user_hand,dealer_hand)
-    print("")
-    print("Dealer shows two cards, one face up. It shows:   " +  str(dealer_hand[1][0]))
+    shuf_deck = shuffle(deck) #shuffles the deck(fisher-yates style) and labels it shuf_deck
+    deal_start(shuf_deck,user_hand,dealer_hand) #deals out the table
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("Dealer shows two cards, one face up. It reads: " +  str(dealer_hand[1][0]))
     print("")
     user_hvalue = process_user_hvalue(user_hand) #processes user hand value, returns and stores as user_hvalue
-    print("Peak at Dealer's cards for debug:   " + str(dealer_hand[0][0]) + " & " + str(dealer_hand[1][0]))
+    #print("Peak at Dealer's cards for debug:   " + str(dealer_hand[0][0]) + " & " + str(dealer_hand[1][0]))
     print("")
     dealer_hvalue = process_dealer_hvalue(dealer_hand) #processes dealer hand value, returns and stores as dealer_hvalue
     user_turn = process_user_turn(shuf_deck,user_hand,user_hvalue)
     user_hvalue = process_user_hvalue(user_hand)
-    print("Your hand is:  ")
+    print("Your hand is: ")
     for elem in user_hand:
         print(elem[0])
-    print("Your hand value is:  ")
-    print(user_hvalue)
+    print("Your hand value is: " + str(user_hvalue))
+    if user_hvalue > 21: #bust catcher
+        print("You have bust.")
+        result = "dealer"
+        return result
     dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue)
     dealer_hvalue = process_dealer_hvalue(dealer_hand)
+    if dealer_hvalue > 21: #bust catcher
+        print("Dealer has bust.")
+        result = "user"
+        return result
     print("Dealer hand is:  ")
     for elem in dealer_hand:
         print(elem[0])
     print("Dealer hand value is:  ")
     print(dealer_hvalue)
-    if user_hvalue > dealer_hvalue and user_hvalue <= 21: #user wins
+    if user_hvalue > dealer_hvalue: #user win
         result = "user"
         return result
-    elif user_hvalue == dealer_hvalue or user_hvalue > 21 and dealer_hvalue > 21: #tie
+    elif user_hvalue == dealer_hvalue: #tie
         result = "tie"
         return result
     else:                                                            #dealer win
         result = "dealer"
         return result
 
-
-
-
 def process_dealer_turn(deck,hand,hvalue):
-    a_counter = 0
-    for elem in hand:
-        if "Ace" in elem:
-            a_counter+= 1
-    while hvalue < 17 and a_counter > 0:
+    while hvalue < 17:
         top_card = deck.pop(0)
         hand.append(top_card)
         hvalue = process_dealer_hvalue(hand)
@@ -82,9 +87,8 @@ def process_user_turn(deck,hand,hvalue):
             hand.append(top_card)
             hvalue = process_user_hvalue(hand)
         elif user_choice == "n" or user_choice == "N":
-            user_choice = input("You choose to stand pat. Are you sure? \n Y/N?")
-            if user_choice == "y" or user_choice == "Y":
-                return deck,hand,hvalue
+            print("You stand pat.")
+            return deck,hand,hvalue
         elif user_choice != "y" or user_choice != "Y" or user_choice != "n" or user_choice != "N":
             print("You must choose a valid entry.")
             pass
@@ -131,7 +135,6 @@ def deal_start(deck,user,dealer):
     user.append(top_card)
     top_card = deck.pop(0)
     dealer.append(top_card)
-
     return deck,user,dealer
     
     
@@ -145,13 +148,11 @@ def shuffle(deck):
     Thanks for the challenge Steven!
     """
     shuf_deck = []
-    
     for i in range(0,len(deck)):
         deck_length = len(deck)
         ran_index = random.randrange(0,deck_length)
         popped_index = deck.pop(ran_index)
         shuf_deck.append(popped_index)
-    
     return shuf_deck
         
         
