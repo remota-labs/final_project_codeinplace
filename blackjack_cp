@@ -1,31 +1,47 @@
 """
-BlackJack: WIP
-todo: fleshout design + description + ask Mehran the Great to mentor me :D
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BlackJack: True to life.
+
+Author: Christopher Peacock
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This program is a text-based blackjack game that pits the user against an AI controlled dealer. 
+I studied the game and sought to make sure that the rules implimented within this program closely resemble
+that of a ruleset presented within a casino environment, along with a true-to-life Fisher-Yates style deck shuffler that
+make's certain each potential outcome is of the same odds any other outcome of the shuffle.
+With that said, please note that BlackJack is played with hundreds of different rulesets as a result of "advantage"
+players zeroing in on optimal BlackJack strategy. 
+The Dealer follows a strict casino policy for dealing process and employs a strategy effectively exact to a professional. 
+Not all casino dealers will hit on a "soft" 17.(Meaning the hand contains at least one Ace) 
+but this Dealer does.(As an added challenge to myself)
 """
 
 import random
 
+BET = 2 #Adjustable bet amountamount
+USER_STACK = 20
+
 def main():
-    BET = 2
-    PLAYER_STACK = 20
-    print("You have " + str(PLAYER_STACK) + " chips. Amount waged per hand: " + str(BET) + " chips.")
-    while PLAYER_STACK > 0:
+    stack = USER_STACK
+    play = input("Want to play BlackJack? Press enter to play.\n")
+    if play == "":
+        print("Nice choice!\nYou're quickly given " + str(stack) + " chips. Amount waged per hand: " + str(BET) + " chips.")
+    while stack > 0:
         result = play_hand()
         if result == "user":
-            PLAYER_STACK += BET
-            print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(PLAYER_STACK)+ " total.")
+            stack += BET
+            print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(stack)+ " total.")
             enter = input("Press Enter to continue. ")
             if enter == "":
-                continue
+                pass
         elif result == "tie":
             print("Game is a tie, hand is pushed")
         elif result == "dealer":
-            PLAYER_STACK -= BET
-            print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(PLAYER_STACK)+ " total.")
-            enter = input("Press Enter to continue. ")
+            stack -= BET
+            print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(stack)+ " total.")
+            enter = input("Press Enter to continue...")
             if enter == "":
-                continue
-    print("You've lost")
+                pass
+    print("You've lost. \n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 def play_hand():
 
@@ -34,34 +50,31 @@ def play_hand():
     dealer_hand = [] #dealer hand
     shuf_deck = shuffle(deck) #shuffles the deck(fisher-yates style) and labels it shuf_deck
     deal_start(shuf_deck,user_hand,dealer_hand) #deals out the table
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("SHUFFLING & DEALING\n")
     print("Dealer shows two cards, one face up. It reads: " +  str(dealer_hand[1][0]))
-    print("")
     user_hvalue = process_user_hvalue(user_hand) #processes user hand value, returns and stores as user_hvalue
-    #print("Peak at Dealer's cards for debug:   " + str(dealer_hand[0][0]) + " & " + str(dealer_hand[1][0]))
-    print("")
     dealer_hvalue = process_dealer_hvalue(dealer_hand) #processes dealer hand value, returns and stores as dealer_hvalue
     user_turn = process_user_turn(shuf_deck,user_hand,user_hvalue)
     user_hvalue = process_user_hvalue(user_hand)
-    print("Your hand is: ")
-    for elem in user_hand:
-        print(elem[0])
-    print("Your hand value is: " + str(user_hvalue))
+    
+    
+    print("Your hand shows: ")
+    print_hand(user_hand)
+    print("Your hand value is: \n" + str(user_hvalue))
     if user_hvalue > 21: #bust catcher
-        print("You have bust.")
+        print("!!!\nYou have bust.\n!!!")
         result = "dealer"
         return result
+    print("\nThe dealer plays:")
     dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue)
     dealer_hvalue = process_dealer_hvalue(dealer_hand)
     if dealer_hvalue > 21: #bust catcher
-        print("Dealer has bust.")
+        enter = input("!!!\nDealer has bust.\n\n Press enter to continue...")
         result = "user"
         return result
-    print("Dealer hand is:  ")
-    for elem in dealer_hand:
-        print(elem[0])
-    print("Dealer hand value is:  ")
-    print(dealer_hvalue)
+    print("\nThe Dealer reveals his hand: ")
+    print_hand(dealer_hand)
+    print("Dealer's hand value is: \n" + str(dealer_hvalue))
     if user_hvalue > dealer_hvalue: #user win
         result = "user"
         return result
@@ -72,16 +85,29 @@ def play_hand():
         result = "dealer"
         return result
 
+def print_hand(hand):
+    hstring = ""
+    for elem in hand:
+        hstring += elem[0]+" "
+    print("~~~~~")
+    print(hstring)
+    print("~~~")
+
 def process_dealer_turn(deck,hand,hvalue):
     while hvalue < 17:
         top_card = deck.pop(0)
+        print("Dealer drew: "+str(top_card[0]))
         hand.append(top_card)
+        print("Dealer's hand becomes: ")
+        print_hand(hand)
         hvalue = process_dealer_hvalue(hand)
     return deck,hand,hvalue
 
 def process_user_turn(deck,hand,hvalue):
     while hvalue <= 21:
-        user_choice = input("Your hand shows:   " + str(hand) + " Hand value: " +str(hvalue)+ "...Would you like another card? \n Y/N?\n")
+        print("Your hand shows: ")
+        print_hand(hand)
+        user_choice=input("You hand value is currently " +str(hvalue)+ " pts. Would you like another card? \n 'Y' -> Hit me Dealer! 'N' -> Stand pat. \n")
         if user_choice == "y" or user_choice == "Y":
             top_card = deck.pop(0)
             hand.append(top_card)
