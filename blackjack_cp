@@ -11,7 +11,7 @@ I studied the game and sought to make sure that the rules implemented within thi
 that of a ruleset presented within a casino environment, along with a Fisher-Yates style deck shuffler that
 make's certain the odds of each potential unique outcome is mathematically equal to any other unique outcome.
 With that said, please note that Blackjack is played with hundreds of different rulesets worldwide as a result of "advantage"
-players zeroing in on optimal Blackjack strategy. 
+players zeroing in on optimal Blackjack strategy.
 The Dealer follows a strict casino policy for the dealing & turn process and employs a strategy effectively exact to that of a professional. 
 Not all casino dealers will hit on a "soft" 17(Meaning the hand contains at least one Ace) but as an added challenge to myself, this one does.
 Blacjkack's first written reference is found in a book by the Spanish Author Miguel de Cervantes, most famous for writing Don Quixote.
@@ -32,7 +32,6 @@ def main():
         result = play_hand()
         if result == "user":
             htracker += 1
-
             stack += BET
             print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(stack)+ " total.")
             enter = input("Press Enter to continue.")
@@ -46,7 +45,6 @@ def main():
                 pass
         elif result == "dealer":
             htracker += 1
-
             stack -= BET
             print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(stack)+ " total.")
             enter = input("Press Enter to continue.")
