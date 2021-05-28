@@ -24,12 +24,15 @@ USER_STACK = 20 #ser_stack sizing
 
 def main():
     stack = USER_STACK
+    htracker = 0 #hand tracker
     play = input("Want to play BlackJack? Press enter to play.\n")
     if play == "":
         print("Nice choice!\nYou're quickly given " + str(stack) + " chips. Amount waged per hand: " + str(BET) + " chips.")
     while stack > 0:
         result = play_hand()
         if result == "user":
+            htracker += 1
+
             stack += BET
             print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(stack)+ " total.")
             enter = input("Press Enter to continue.")
@@ -37,16 +40,21 @@ def main():
                 pass
         elif result == "tie":
             print("Game is a tie, hand is pushed")
+            htracker += 1
             enter = input("Press Enter to continue.")
             if enter == "":
                 pass
         elif result == "dealer":
+            htracker += 1
+
             stack -= BET
             print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(stack)+ " total.")
             enter = input("Press Enter to continue.")
             if enter == "":
                 pass
     print("You've lost. \n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("Total hands played: " + htracker) #prints hand_tracker at end(for later use in tracking high scores)
+
 
 def play_hand():
     """
@@ -72,7 +80,7 @@ def play_hand():
         result = "dealer"
         return result
     print("\nThe dealer plays:")
-    dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue) #processes dealer turn, returns and stores as dealer_turn
+    dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue,user_hvalue) #processes dealer turn, returns and stores as dealer_turn
     dealer_hvalue = process_hvalue(dealer_hand) #processes dealer hand value post turn
     if dealer_hvalue > 21:               #dealer bust catcher
         print("\nThe Dealer busts and reveals his hand: ")
@@ -106,19 +114,21 @@ def print_hand(hand):
     print(hstring)
     print("~~~")
 
-def process_dealer_turn(deck,hand,hvalue):
+def process_dealer_turn(deck,hand,dhvalue,uhvalue):
     """
     This function is the Dealer AI, it takes the deck, dealer hand, and dealer hand value then returns them in their post-turn state. 
+    It only plays if it's hand value needs to be improved in order to beat the user's hand value.
     It plays true to a casino dealer would, including (as a lot of casino's allow) hitting on a "soft" 17.
     "Soft" refers to the existence of an ace in hand.
     The dealer MUST draw cards if the hand value is under 17.
     """
-    while hvalue < 17:
-        top_card = deck.pop(0)
-        print("Dealer drew: "+str(top_card[0]))
-        hand.append(top_card)
-        hvalue = process_hvalue(hand)
-    return deck,hand,hvalue
+    if dhvalue < uhvalue:
+        while dhvalue < 17:
+            top_card = deck.pop(0)
+            print("Dealer drew: "+str(top_card[0]))
+            hand.append(top_card)
+            dhvalue = process_hvalue(hand)
+    return deck,hand,dhvalue,uhvalue
 
 def process_user_turn(deck,hand,hvalue):
     """
