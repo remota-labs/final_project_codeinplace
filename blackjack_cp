@@ -1,24 +1,26 @@
 """
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-BlackJack: True to life.
+CodeinPlace Final project:
 
-Author: Christopher Peacock
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This program is a text-based blackjack game that pits the user against an AI controlled dealer. 
-I studied the game and sought to make sure that the rules implimented within this program closely resemble
-that of a ruleset presented within a casino environment, along with a true-to-life Fisher-Yates style deck shuffler that
-make's certain each potential outcome is of the same odds any other outcome of the shuffle.
-With that said, please note that BlackJack is played with hundreds of different rulesets as a result of "advantage"
-players zeroing in on optimal BlackJack strategy. 
-The Dealer follows a strict casino policy for dealing process and employs a strategy effectively exact to a professional. 
-Not all casino dealers will hit on a "soft" 17.(Meaning the hand contains at least one Ace) 
-but this Dealer does.(As an added challenge to myself)
+    Blackjack: True to life.
+
+        Author: Christopher Peacock
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This program is a text-based Blackjack game that pits the user against a true-to-form AI controlled dealer. 
+I studied the game and sought to make sure that the rules implemented within this program closely resemble
+that of a ruleset presented within a casino environment, along with a Fisher-Yates style deck shuffler that
+make's certain the odds of each potential unique outcome is mathematically equal to any other unique outcome.
+With that said, please note that Blackjack is played with hundreds of different rulesets worldwide as a result of "advantage"
+players zeroing in on optimal Blackjack strategy. 
+The Dealer follows a strict casino policy for the dealing & turn process and employs a strategy effectively exact to that of a professional. 
+Not all casino dealers will hit on a "soft" 17(Meaning the hand contains at least one Ace) but as an added challenge to myself, this one does.
+Blacjkack's first written reference is found in a book by the Spanish Author Miguel de Cervantes, most famous for writing Don Quixote.
 """
 
 import random
 
-BET = 2 #bet sizing
-USER_STACK = 20 #stack size
+BET = 2 #bet sizing 
+USER_STACK = 20 #ser_stack sizing
 
 def main():
     stack = USER_STACK
@@ -30,62 +32,73 @@ def main():
         if result == "user":
             stack += BET
             print("You have won the hand. You collect " + str(BET) + " chips, bringing your stack up to " +str(stack)+ " total.")
-            enter = input("Press Enter to continue. ")
+            enter = input("Press Enter to continue.")
             if enter == "":
                 pass
         elif result == "tie":
             print("Game is a tie, hand is pushed")
+            enter = input("Press Enter to continue.")
+            if enter == "":
+                pass
         elif result == "dealer":
             stack -= BET
             print("The Dealer has won the hand. You lose " +str(BET)+ " chips, bringing your stack down to " +str(stack)+ " total.")
-            enter = input("Press Enter to continue...")
+            enter = input("Press Enter to continue.")
             if enter == "":
                 pass
     print("You've lost. \n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 def play_hand():
-
+    """
+    This function takes a brand new deck of cards, shuffles them, establishes player and dealer hands, and plays to entirety,
+    one hand of BlackJack. It then spits out the winner of the hand as a result. 
+    """
     deck = deck_of_cards() #deck of cards
     user_hand = [] #user hand
     dealer_hand = [] #dealer hand
     shuf_deck = shuffle(deck) #shuffles the deck(fisher-yates style) and labels it shuf_deck
     deal_start(shuf_deck,user_hand,dealer_hand) #deals out the table
-    print("SHUFFLING & DEALING\n")
+    print("~~~SHUFFLING & DEALING~~~\n")
     print("Dealer shows two cards, one face up. It reads: " +  str(dealer_hand[1][0]))
-    user_hvalue = process_user_hvalue(user_hand) #processes user hand value, returns and stores as user_hvalue
-    dealer_hvalue = process_dealer_hvalue(dealer_hand) #processes dealer hand value, returns and stores as dealer_hvalue
-    user_turn = process_user_turn(shuf_deck,user_hand,user_hvalue)
-    user_hvalue = process_user_hvalue(user_hand)
-    
-    
+    user_hvalue = process_hvalue(user_hand) #processes user hand value, returns and stores as user_hvalue
+    dealer_hvalue = process_hvalue(dealer_hand) #processes dealer hand value, returns and stores as dealer_hvalue
+    user_turn = process_user_turn(shuf_deck,user_hand,user_hvalue) #processes user turn, returns and stores as user_turn
+    user_hvalue = process_hvalue(user_hand) #processes user hand value post turn
     print("Your hand shows: ")
     print_hand(user_hand)
     print("Your hand value is: \n" + str(user_hvalue))
-    if user_hvalue > 21: #bust catcher
+    if user_hvalue > 21:                #user bust catcher
         print("!!!\nYou have bust.\n!!!")
         result = "dealer"
         return result
     print("\nThe dealer plays:")
-    dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue)
-    dealer_hvalue = process_dealer_hvalue(dealer_hand)
-    if dealer_hvalue > 21: #bust catcher
-        enter = input("!!!\nDealer has bust.\n\n Press enter to continue...")
+    dealer_turn = process_dealer_turn(shuf_deck,dealer_hand,dealer_hvalue) #processes dealer turn, returns and stores as dealer_turn
+    dealer_hvalue = process_hvalue(dealer_hand) #processes dealer hand value post turn
+    if dealer_hvalue > 21:               #dealer bust catcher
+        print("\nThe Dealer busts and reveals his hand: ")
+        print_hand(dealer_hand)
+        print("Dealer's hand value is: \n" + str(dealer_hvalue))
+        enter = input("Press enter to continue...")
         result = "user"
         return result
     print("\nThe Dealer reveals his hand: ")
     print_hand(dealer_hand)
     print("Dealer's hand value is: \n" + str(dealer_hvalue))
-    if user_hvalue > dealer_hvalue: #user win
+    if user_hvalue > dealer_hvalue:    #user win
         result = "user"
         return result
     elif user_hvalue == dealer_hvalue: #tie
         result = "tie"
         return result
-    else:                                                            #dealer win
+    else:                              #dealer win
         result = "dealer"
         return result
 
 def print_hand(hand):
+    """
+    This function loops through a given hand and print's the card faces to the terminal in a more aesthetically 
+    pleasing way than just printing a list.
+    """
     hstring = ""
     for elem in hand:
         hstring += elem[0]+" "
@@ -94,16 +107,25 @@ def print_hand(hand):
     print("~~~")
 
 def process_dealer_turn(deck,hand,hvalue):
+    """
+    This function is the Dealer AI, it takes the deck, dealer hand, and dealer hand value then returns them in their post-turn state. 
+    It plays true to a casino dealer would, including (as a lot of casino's allow) hitting on a "soft" 17.
+    "Soft" refers to the existence of an ace in hand.
+    The dealer MUST draw cards if the hand value is under 17.
+    """
     while hvalue < 17:
         top_card = deck.pop(0)
         print("Dealer drew: "+str(top_card[0]))
         hand.append(top_card)
-        print("Dealer's hand becomes: ")
-        print_hand(hand)
-        hvalue = process_dealer_hvalue(hand)
+        hvalue = process_hvalue(hand)
     return deck,hand,hvalue
 
 def process_user_turn(deck,hand,hvalue):
+    """
+    This function processes the entire turn of a user's hand.
+    It will allow the player to pick up cards as long as player isn't bust(over 21).
+    It takes the deck, user hand, and user's hand value. It returns all three in their post-turn state.
+    """
     while hvalue <= 21:
         print("Your hand shows: ")
         print_hand(hand)
@@ -111,7 +133,7 @@ def process_user_turn(deck,hand,hvalue):
         if user_choice == "y" or user_choice == "Y":
             top_card = deck.pop(0)
             hand.append(top_card)
-            hvalue = process_user_hvalue(hand)
+            hvalue = process_hvalue(hand)
         elif user_choice == "n" or user_choice == "N":
             print("You stand pat.")
             return deck,hand,hvalue
@@ -121,20 +143,13 @@ def process_user_turn(deck,hand,hvalue):
     print("You have bust.")
     return deck,hand,hvalue
 
-def process_dealer_hvalue(hand):
-    a_counter = 0 #ace counter initialize
-    value = 0
-    for elem in hand:
-        value += elem[1]
-        if "Ace" in elem[0]:
-            a_counter += 1
-    while value > 21 and a_counter > 0:
-        value -= 10 
-        a_counter -= 1
-    return value
-
-
-def process_user_hvalue(hand):
+def process_hvalue(hand):
+    """
+    In order to work around the Ace's fluid value in BlackJack I built this function.
+    This function takes a hand(dealer or player), counts the amount of aces, and calculates the base value(Ace=11).
+    If the hand is bust(over 21 points) AND contains an ace(s) this function will convert the ace value to 1. It will do this
+    x times where x is the amount of Aces.
+    """
     a_counter = 0 #ace counter initialize
     value = 0
     for elem in hand:
@@ -148,8 +163,7 @@ def process_user_hvalue(hand):
 
 def deal_start(deck,user,dealer):
     """
-    deal_start function takes the deck(list), along with the user and dealer hands, 
-    and dealers 4 cards in this order from the top of the shuffled deck: 
+    deal_start function takes the shuffled deck and deals 4 cards in this order from the top of the shuffled deck: 
     user, dealer, user dealer.
     It then returns the remaining deck, and newly built user & dealer hands.
     """
@@ -163,8 +177,6 @@ def deal_start(deck,user,dealer):
     dealer.append(top_card)
     return deck,user,dealer
     
-    
-
 def shuffle(deck):
     """
     Fisher-Yates Shuffle function - Chris Peacock's take.
@@ -181,14 +193,10 @@ def shuffle(deck):
         shuf_deck.append(popped_index)
     return shuf_deck
         
-        
-
-
-
 def deck_of_cards():
     """
     A list of 52 individual lists. Those 52 list elements pertain 
-    to each of the unique 52 cards in a traditional deck of cards.
+    to each of the unique 52 playing cards and their BlackJacj values.
     Format: [Card face , Card value]
     """
     deck = [
